@@ -1,0 +1,27 @@
+{
+  "name": "youtify",
+  "version": "1.0.0",
+  "description": "Analyze your recently listened to artists to predict your mood and create related data visualizations",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colinscruggs/youtify.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/colinscruggs/youtify/issues"
+  },
+  "homepage": "https://github.com/colinscruggs/youtify#readme",
+  "dependencies": {
+    "next": "^9.3.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  }
+}
