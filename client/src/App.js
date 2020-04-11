@@ -7,19 +7,23 @@ import {Sigma, RandomizeNodePositions, RelativeSize} from 'react-sigma';
 const spotifyApi = new SpotifyWebApi();
 
 class App extends Component {
+  token = '';
+
   constructor(){
     super();
     // fetch Spotify hash params/access token
     const params = this.getHashParams();
     const token = params.access_token;
-    if (token) {
+    this.token = token;
+    if (this.token) {
       spotifyApi.setAccessToken(token);
     }
     // INITIALIZE STATE HERE:
     this.state = {
       loggedIn: token ? true : false,
       userData: {},
-      nowPlaying: { name: 'N/A', albumArt: '' }
+      nowPlaying: { name: 'N/A', albumArt: '' },
+      topArtists: {}
     }
   }
 
@@ -46,9 +50,10 @@ class App extends Component {
   init() {
     this.getUserProfile();
     this.getNowPlaying();
+    this.getRecentlyListenedArtists();
   }
 
-  getNowPlaying(){
+  getNowPlaying() {
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
         this.setState({
@@ -60,7 +65,7 @@ class App extends Component {
       })
   }
 
-  getUserProfile(){
+  getUserProfile() {
     console.log('[ ] attempting to fetch user profile')
     spotifyApi.getMe()
       .then((response) => {
@@ -69,6 +74,17 @@ class App extends Component {
         })
       });
     console.log('[x] user profile successfully fetched')
+  }
+
+  getRecentlyListenedArtists() {
+    console.log('[ ] attempting to fetch recently listened artists')
+    spotifyApi.getMyTopArtists()
+      .then((response) => {
+        this.setState({
+          topArtists: response
+        })
+      });
+    console.log('[x] recently listened artists fetched')
   }
 
   landingContent() {
