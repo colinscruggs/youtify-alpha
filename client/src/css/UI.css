@@ -1,0 +1,57 @@
+.title {
+  font-family: 'Montserrat Subrayada', sans-serif;
+}
+
+.loggedIn {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin:  0;
+  padding:  0;
+}
+
+.title {
+  font-family:  'Montserrat Subrayada', sans-serif;
+}
+
+.header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-around;
+  background: lightgreen;
+  margin: 0;
+  padding: 0.25rem;
+  box-shadow: lightgrey 0px 4px 30px -10px;
+  z-index: 99;
+}
+
+.userProf {
+  display: flex;
+  align-items: center;
+}
+
+.profPic {
+  height: 40px;
+  width: 40px;
+  border-radius: 100%;
+  margin-left: 1rem;
+}
+
+.nowPlaying {
+  display: flex;
+  align-items: center;
+}
+
+.text {
+  font-family: 'Nunito', sans-serif;
+}
+
+.graph {
+  width: 100%;
+  height: 100%;
+  background: azure; /* TODO: add cool gradient*/
+  display: flex;
+}

@@ -2,14 +2,31 @@ import React, { Component } from 'react';
 import './css/App.css';
 import SpotifyWebApi from 'spotify-web-api-js';
 import {Sigma, RandomizeNodePositions, RelativeSize} from 'react-sigma';
+import './css/UI.css';
 
 // initialize global spotifyAPI ref
 const spotifyApi = new SpotifyWebApi();
-
-const NUM_ARTISTS = 10;
+const NUM_ARTISTS = 12;
+const REFRESH_INTERVAL = 10;
 
 class App extends Component {
   token = '';
+
+  componentDidMount() {
+    // fetch user profile when logged in
+    if(this.state.loggedIn === true) {
+      this.init();
+    }
+  }
+
+  init() {
+      // fetch all requisite data from spotifyApi here on mount
+    this.getUserProfile();
+    this.getUserTopArtists();
+    // set interval to fetch now playing every ~10 seconds
+    this.getNowPlaying();
+    setInterval(() => this.getNowPlaying(), REFRESH_INTERVAL * 1000)
+  }
 
   constructor(){
     super();
@@ -45,34 +62,25 @@ class App extends Component {
     return hashParams;
   }
 
-  componentDidMount() {
-    // fetch user profile when logged in
-    if(this.state.loggedIn === true) {
-      this.init();
-    }
-  }
-
-  // fetch all requisite data from spotifyApi here on mount
-  init() {
-    this.getUserProfile();
-    this.getNowPlaying();
-    this.getUserTopArtists();
-  }
-
   getNowPlaying() {
     try {
+      console.log('getting now playing')
       spotifyApi.getMyCurrentPlaybackState()
         .then((response) => {
-          if(response)
+          if(response) {
             this.setState({
               nowPlaying: { 
                   name: response.item.name, 
+                  artists: response.item.artists.reduce(function(acc, artist, i, artists) {
+                    return acc + (i < artists.length - 1 ? artist.name + ', ' : artist.name);
+                  }, ''),
                   albumArt: response.item.album.images[0].url
                 }
             });
+          }
         })
     } catch (e) {
-      alert(e);
+      console.warn(e);
     }
   }
 
@@ -83,6 +91,7 @@ class App extends Component {
         .then((response) => {
           this.setState({
             userData: response,
+            // add central USER node (n1) to connect top artists to
             artistGraph: {
               ...this.state.artistGraph,
               nodes: [{
@@ -94,19 +103,20 @@ class App extends Component {
         });
     } catch (e) {
       alert(e);
+    } finally {
+      console.log('[x] user profile successfully fetched')
     }
-    console.log('[x] user profile successfully fetched')
   }
 
   getUserTopArtists() {
-    console.log('[ ] attempting to fetch recently listened artists')
+    console.log('[ ] attempting to fetch top listened artists')
     try {
-    spotifyApi.getMyTopArtists({limit: NUM_ARTISTS})
+      spotifyApi.getMyTopArtists({limit: NUM_ARTISTS})
       .then((response) => {
         const topArtists = response.items.map(artist => {
           return {
             artistInfo: artist,
-            relatedArtists: {}
+            relatedArtists: []
           }
         });
 
@@ -114,6 +124,8 @@ class App extends Component {
         this.setState({
           topArtists: topArtists
         });
+
+        console.log(topArtists);
 
         // grab shallow copy of artistGraph to manipulate
         const artistGraphRef = {...this.state.artistGraph};
@@ -152,20 +164,53 @@ class App extends Component {
       });
     } catch (e) {
       alert(e)
+    } finally {
+      console.log('[x] recently listened artists fetched');
     }
-    console.log('[x] recently listened artists fetched')
   }
 
   generateArtistNode(artistInfo, config) {
     return {
       id: artistInfo.id,
-      label: artistInfo.name
+      label: artistInfo.name,
+      ...config
+    }
+  }
+
+  getArtistRelatedArtists(artistId) {
+    return spotifyApi.getArtistRelatedArtists(artistId);
+  }
+
+  async handleArtistNodeClick(artistName) {
+    const artist = this.state.topArtists.find(
+      artist => artist.artistInfo.name === artistName
+    );
+
+    const artistId = this.state.topArtists.findIndex(
+      artist => artist.artistInfo.name === artistName
+    )
+
+    try {
+      let relatedArtists = await spotifyApi.getArtistRelatedArtists(artist.artistInfo.id)
+      console.log(relatedArtists);
+      let newArtistObject = {
+        ...artist,
+        relatedArtists
+      };
+      let topArtists = {...this.state.topArtists}
+      topArtists.splice(artistId, 1, newArtistObject)
+      this.setState({
+        ...this.state,
+        topArtists
+      })
+    } catch (e) {
+      alert(e);
     }
   }
 
   landingContent() {
     return (
-      <div className="notLoggedIn">
+      <div className="notLoggedIn"> 
         <h1>Youtify</h1>
         <p>This app requires authorization from your Spotify account. Log in below:</p>
         <a href='http://localhost:8888' > Login to Spotify </a> 
@@ -175,17 +220,16 @@ class App extends Component {
 
   loggedInContent() {
     return (
-      <div className="loggedIn" style={{width:"100%", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", margin: 0, padding: 0}}> 
-  
-          <div className="header" style={{display:"flex", width: "100%", alignItems: "center", justifyContent: "space-around", background:"lightgreen", margin: 0, padding: "0.5rem", boxShadow: "lightgrey 0px 4px 30px -10px", zIndex: 99}}>
-          <h1>Youtify</h1>
-            <div className="userProf" style={{display: "flex", alignItems: "center"}}>
-              <h3 >Hello { this.state.userData.display_name }</h3>
-              <img src={this.state.userData.images ? this.state.userData.images[0].url : ''} style={{ height: 40, width: 40, borderRadius: 100, marginLeft: "1rem" }}/>
+      <div className="loggedIn"> 
+          <div className="header">
+          <h1 className="title">Youtify</h1>
+            <div className="userProf">
+              <h3 className="text">Hello, { this.state.userData.display_name }</h3>
+              <img className="profPic" src={this.state.userData.images ? this.state.userData.images[0].url : ''} />
             </div>
-            <div className="nowPlaying" style={{display: "flex", alignItems: "center"}}>
-              <p><strong>Now Playing: </strong> { this.state.nowPlaying.name }</p>
-              <img src={this.state.nowPlaying.albumArt} style={{ height: 40, borderRadius: 0, marginLeft: "1rem" }}/>
+            <div className="nowPlaying">
+    <p className="text"><strong>Now Playing: </strong> { this.state.nowPlaying.name } - { this.state.nowPlaying.artists }</p>
+              <img src={this.state.nowPlaying.albumArt} className="profPic" />
             </div>
           </div>
           <div>
@@ -193,9 +237,15 @@ class App extends Component {
           </div>
           { 
           this.state.artistGraph.edges.length >= NUM_ARTISTS ?
-          <Sigma graph={this.state.artistGraph} settings={{drawEdges: true, clone: false}} style={{width:"100%", height:"100%", background:"azure", display:"flex"}}>
-            <RelativeSize initialSize={5}/>
-            <RandomizeNodePositions/>
+          <Sigma 
+            classname="graph"
+            style={{width:"100%", height:"100%", background:"azure", display:"flex"}}
+            graph={this.state.artistGraph} 
+            settings={{drawEdges: true, clone: false}} 
+            onClickNode={e => this.handleArtistNodeClick(e.data.node.label)}
+          >
+              <RelativeSize initialSize={10}/>
+              <RandomizeNodePositions/>
           </Sigma>
           : null
           }
