@@ -42,11 +42,12 @@ class App extends Component {
       loggedIn: token ? true : false,
       userData: {},
       nowPlaying: { name: 'N/A', albumArt: '' },
-      topArtists: {},
+      topArtists: [],
       artistGraph: {
         nodes:[], 
         edges:[]
-      }
+      },
+      renderGraph: false
     }
   }
 
@@ -130,16 +131,15 @@ class App extends Component {
         // grab shallow copy of artistGraph to manipulate
         const artistGraphRef = {...this.state.artistGraph};
 
-        // TODO: move to function
         if(artistGraphRef) {
           // loop over top artists, creating a node and set of edges for each connecting to the user's node
           let nodeNum = 2;
           this.state.topArtists.forEach(artist => {
             artistGraphRef.nodes.push(
-              {
-                id: 'n' + nodeNum,
-                label: artist.artistInfo.name
-              }
+              this.generateArtistNode(
+                'n' + nodeNum,
+                artist.artistInfo.name
+              )
             );
             nodeNum++;
           })
@@ -166,15 +166,25 @@ class App extends Component {
       alert(e)
     } finally {
       console.log('[x] recently listened artists fetched');
+      this.setState({
+        ...this.state,
+        renderGraph: true
+      })
     }
   }
 
-  generateArtistNode(artistInfo, config) {
+  generateArtistNode(id, label, config) {
     return {
-      id: artistInfo.id,
-      label: artistInfo.name,
+      id: id,
+      label: label,
       ...config
     }
+  }
+
+  findArtistNode(artistName) {
+    return this.state.artistGraph.nodes.find(node => {
+      return node.label === artistName;
+    });
   }
 
   getArtistRelatedArtists(artistId) {
@@ -186,25 +196,97 @@ class App extends Component {
       artist => artist.artistInfo.name === artistName
     );
 
-    const artistId = this.state.topArtists.findIndex(
+    console.log("Selected " + artist);
+
+    const artistIndex = this.state.topArtists.findIndex(
       artist => artist.artistInfo.name === artistName
     )
 
     try {
-      let relatedArtists = await spotifyApi.getArtistRelatedArtists(artist.artistInfo.id)
-      console.log(relatedArtists);
-      let newArtistObject = {
-        ...artist,
-        relatedArtists
-      };
-      let topArtists = {...this.state.topArtists}
-      topArtists.splice(artistId, 1, newArtistObject)
+      let relatedArtistsResponse = (await spotifyApi.getArtistRelatedArtists(artist.artistInfo.id)).artists;
+      console.log(relatedArtistsResponse);
+
       this.setState({
         ...this.state,
-        topArtists
+        renderGraph: false
       })
+
+      let newArtistObject = {
+        ...artist,
+        relatedArtists:
+          relatedArtistsResponse.map(a => {
+            return {
+              artistInfo: a,
+              relatedArtists: [],
+              isRelated: 1 // LEVEL OF RELATED-NESS
+            }
+          })
+      };
+
+      // replace topArtists array with copied/spliced version containing clicked artist & related
+      let topArtistsCopy = [...this.state.topArtists];
+      topArtistsCopy.splice(artistIndex, 1, newArtistObject)
+      this.setState({
+        ...this.state,
+        topArtistsCopy
+      });
+
+      // grab shallow copy of artistGraph to manipulate
+      const artistGraphRef = {...this.state.artistGraph};
+
+      if (artistGraphRef) {
+        // loop over top artists, creating a node and set of edges for each connecting to the user's node
+        let artistId = newArtistObject.artistInfo.id;
+        let nodeNum = 1;
+
+        let relatedArtistNodes = []; // TODO: push to artistGraphRef
+        // iterate over selected artist, adding nodes for each related artist to artist graph reference
+        relatedArtistsResponse.forEach(artist => {
+          relatedArtistNodes.push(
+            this.generateArtistNode(
+              'n' + artistId + nodeNum,
+              artist.name
+            )
+          );
+          nodeNum++;
+        });
+
+        console.log(relatedArtistNodes);
+
+        let edgeNum = 1;
+        let relatedArtistEdges = [];
+        let selectedArtistNodeId = this.findArtistNode(this.state.topArtists[artistIndex].artistInfo.name).id;
+        console.log(selectedArtistNodeId);
+        // iterate across generated nodes, creating edges from selected artist to each related artist node
+        relatedArtistNodes.forEach(node => {
+          relatedArtistEdges.push({
+            id: 'e' + artistId + edgeNum,
+            source: selectedArtistNodeId,
+            target: node.id,
+            label: node.label
+          })
+          edgeNum++;
+        });
+
+        console.log(relatedArtistEdges);
+
+        // concat relatedArtistNodes and relatedArtistEdges to artistGraphRef
+        artistGraphRef.nodes = artistGraphRef.nodes.concat(relatedArtistNodes);
+        artistGraphRef.edges = artistGraphRef.edges.concat(relatedArtistEdges);
+
+        console.log(artistGraphRef);
+
+        this.setState({
+          artistGraph: artistGraphRef
+        });
+      }
     } catch (e) {
       alert(e);
+    } finally {
+      this.setState({
+        ...this.state,
+        renderGraph: true
+      })
     }
   }
 
@@ -237,7 +319,16 @@ class App extends Component {
           </div>
           { 
           this.state.artistGraph.edges.length >= NUM_ARTISTS ?
-          <Sigma 
+          this.sigmaGraph()
+          : null
+          }
+        </div>
+    );
+  }
+
+  sigmaGraph() {
+    return (
+      <Sigma 
             classname="graph"
             style={{width:"100%", height:"100%", background:"azure", display:"flex"}}
             graph={this.state.artistGraph} 
@@ -247,10 +338,7 @@ class App extends Component {
               <RelativeSize initialSize={10}/>
               <RandomizeNodePositions/>
           </Sigma>
-          : null
-          }
-        </div>
-    );
+    )
   }
 
 
