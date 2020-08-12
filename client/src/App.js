@@ -6,7 +6,7 @@ import './css/UI.css';
 
 // initialize global spotifyAPI ref
 const spotifyApi = new SpotifyWebApi();
-const NUM_ARTISTS = 12;
+let NUM_ARTISTS = 10;
 const REFRESH_INTERVAL = 10;
 
 class App extends Component {
@@ -318,28 +318,28 @@ class App extends Component {
             
           </div>
           { 
-          this.state.artistGraph.edges.length >= NUM_ARTISTS ?
-          this.sigmaGraph()
+            this.state.artistGraph.edges.length >= NUM_ARTISTS ?
+            this.sigmaGraph()
           : null
           }
         </div>
     );
   }
 
-  sigmaGraph() {
-    return (
-      <Sigma 
-            classname="graph"
-            style={{width:"100%", height:"100%", background:"azure", display:"flex"}}
-            graph={this.state.artistGraph} 
-            settings={{drawEdges: true, clone: false}} 
-            onClickNode={e => this.handleArtistNodeClick(e.data.node.label)}
-          >
-              <RelativeSize initialSize={10}/>
-              <RandomizeNodePositions/>
-          </Sigma>
-    )
-  }
+  // sigmaGraph() {
+  //   return (
+  //     <Sigma 
+  //           classname="graph"
+  //           style={{width:"100%", height:"100%", background:"azure", display:"flex"}}
+  //           graph={this.state.artistGraph} 
+  //           settings={{drawEdges: true, clone: false}} 
+  //           onClickNode={e => this.handleArtistNodeClick(e.data.node.label)}
+  //         >
+  //             <RelativeSize initialSize={10}/>
+  //             <RandomizeNodePositions/>
+  //         </Sigma>
+  //   )
+  // }
 
 
   render() {
