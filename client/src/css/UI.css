@@ -46,9 +46,7 @@
   font-family: 'Nunito', sans-serif;
 }
 
-.graph {
-  width: 100%;
-  height: 100%;
-  background: azure; /* TODO: add cool gradient*/
-  display: flex;
+.topArtistsContainer {
+  margin-top: 1em;
+  background: aliceblue;
 }

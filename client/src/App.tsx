@@ -6,6 +6,7 @@ import './css/App.css';
 import './css/UI.css';
 
 import { State } from './models/State';
+import TopArtists from './components/TopArtists';
 
 // initialize global spotifyAPI ref
 const spotifyApi = new SpotifyWebApi();
@@ -45,7 +46,7 @@ class App extends Component<any, State> {
       loggedIn: token ? true : false,
       userData: {} as SpotifyApi.CurrentUsersProfileResponse,
       nowPlaying: { name: '', albumArt: '', artists: '' },
-      topArtists: []
+      topArtists: [] as SpotifyApi.ArtistObjectFull[]
     }
   }
 
@@ -104,19 +105,12 @@ class App extends Component<any, State> {
     try {
       spotifyApi.getMyTopArtists({limit: NUM_ARTISTS})
       .then((response) => {
-        const topArtists = response.items.map(artist => {
-          return {
-            artistInfo: artist,
-            relatedArtists: []
-          }
-        });
-
         // store user's top artists
         this.setState({
-          topArtists: topArtists
+          topArtists: response.items
         });
 
-        console.log(topArtists);
+        console.log(response.items);
       });
     }
     catch (e) {
@@ -169,9 +163,9 @@ class App extends Component<any, State> {
 
         {/* DASHBORD */}
         <div style={{'width': '100%'}}>
-          <Row gutter={{xs: 8, sm: 16, md: 24, lg: 32 }}>
+          <Row gutter={[{xs: 8, sm: 16, md: 24, lg: 32 }, {xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={12} className="gutter-row">
-                Top artists
+                <TopArtists topArtists={this.state.topArtists}/>
               </Col>
               <Col span={12} className="gutter-row">
                 <div>
