@@ -1,5 +1,6 @@
 .title {
   font-family: 'Montserrat Subrayada', sans-serif;
+  margin-top: 0.5em;
 }
 
 .loggedIn {
@@ -10,10 +11,6 @@
   align-items: center;
   margin:  0;
   padding:  0;
-}
-
-.title {
-  font-family:  'Montserrat Subrayada', sans-serif;
 }
 
 .header {
@@ -30,7 +27,7 @@
 
 .userProf {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .profPic {
@@ -42,8 +39,7 @@
 
 .nowPlaying {
   display: flex;
-  align-items: center;
-  max-width: 33%
+  align-items: flex-end;
 }
 
 .text {

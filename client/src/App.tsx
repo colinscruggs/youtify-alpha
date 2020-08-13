@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import './css/App.css';
+import { Grid, Row, Col } from 'antd';
 import SpotifyWebApi from 'spotify-web-api-js';
+
+import './css/App.css';
 import './css/UI.css';
+
 import { State } from './models/State';
 
 // initialize global spotifyAPI ref
@@ -40,8 +43,8 @@ class App extends Component<any, State> {
     // INITIALIZE STATE HERE:
     this.state = {
       loggedIn: token ? true : false,
-      userData: {},
-      nowPlaying: { name: 'N/A', albumArt: '', artists: '' },
+      userData: {} as SpotifyApi.CurrentUsersProfileResponse,
+      nowPlaying: { name: '', albumArt: '', artists: '' },
       topArtists: []
     }
   }
@@ -147,18 +150,38 @@ class App extends Component<any, State> {
               <img className="profPic" src={this.state.userData.images ? this.state.userData.images[0].url : ''} />
             </div>
             <div className="nowPlaying">
-              <p className="text">
-                <strong>Now Playing: </strong> { this.state.nowPlaying.name } - { this.state.nowPlaying.artists }
-              </p>
-              <img src={this.state.nowPlaying.albumArt} className="profPic" />
+              <h3 className="text">
+                <strong>Now Playing: </strong>
+                { this.state.nowPlaying.name !== '' ? 
+                  this.state.nowPlaying.name + '-' + this.state.nowPlaying.artists
+                  : 'N/A'
+                }
+              </h3>
+              { this.state.nowPlaying.name !== '' ? 
+                <img src={this.state.nowPlaying.albumArt} className="profPic" />
+                : null
+              }
             </div>
           </div>
           <div>
             
           </div>
 
-        <div>
-          Dashboard goes here
+        {/* DASHBORD */}
+        <div style={{'width': '100%'}}>
+          <Row gutter={{xs: 8, sm: 16, md: 24, lg: 32 }}>
+              <Col span={12} className="gutter-row">
+                Top artists
+              </Col>
+              <Col span={12} className="gutter-row">
+                <div>
+                  Genre Taste
+                </div>
+                <div >
+                  Listening Statistics
+                </div>
+              </Col>
+          </Row>
         </div>
         </div>
     );
