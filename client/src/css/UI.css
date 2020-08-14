@@ -1,6 +1,15 @@
 .title {
   font-family: 'Montserrat Subrayada', sans-serif;
   margin-top: 0.5em;
+  position: relative;
+  top: 0.5em;
+  display: flex;
+  align-items: baseline;
+}
+
+.title .ant-spin {
+  color: #1DB954;
+  margin-left: 1em;
 }
 
 .loggedIn {
@@ -40,6 +49,7 @@
 .nowPlaying {
   display: flex;
   align-items: flex-end;
+  margin-top: 0.5rem;
 }
 
 .text {
@@ -47,6 +57,31 @@
 }
 
 .topArtistsContainer {
-  margin-top: 1em;
-  background: aliceblue;
+  margin: 2em;
+  padding: 1em;
+  border-radius: 1em;
+  background: #eee;
+  opacity: 0.9;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+  0 2.8px 2.2px rgba(0, 0, 0, 0.015),
+  0 6.7px 5.3px rgba(0, 0, 0, 0.024),
+  0 12.5px 10px rgba(0, 0, 0, 0.015),
+  0 10.3px 17.9px rgba(0, 0, 0, 0.016),
+  0 20px 15.2px rgba(0, 0, 0, 0.01),
+  0 20px 80px rgba(0, 0, 0, 0.12)
+;
+
+}
+
+.topArtistsHeader h1 {
+  flex: 1 0;
+  align-self: center;
+}
+
+.rangeSlider {
+  display: flex;
+  flex-direction: column;
+  margin: 0 4em;
 }

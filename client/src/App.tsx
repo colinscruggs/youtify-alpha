@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
-import { Grid, Row, Col } from 'antd';
+import { Spin, Row, Col } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import SpotifyWebApi from 'spotify-web-api-js';
 
 import './css/App.css';
 import './css/UI.css';
 
 import { State } from './models/State';
-import TopArtists from './components/TopArtists';
+import MostListened from './components/MostListened';
+import { TimeRange } from './models/TimeRange';
 
 // initialize global spotifyAPI ref
 const spotifyApi = new SpotifyWebApi();
 let NUM_ARTISTS = 10;
 const REFRESH_INTERVAL = 10;
+const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} />;
 
 class App extends Component<any, State> {
   token = '';
@@ -20,6 +23,16 @@ class App extends Component<any, State> {
     // fetch user profile when logged in
     if(this.state.loggedIn === true) {
       this.init();
+    }
+  }
+
+  componentDidUpdate(prevProps: any, prevState: State) {
+    // watch updates on artistRange and trackRange; fetch respective lists
+    if(this.state.artistRange !== prevState.artistRange) {
+      this.getUserTopArtists();
+    }
+    if(this.state.trackRange !== prevState.trackRange) {
+      this.getUserTopTracks();
     }
   }
 
@@ -46,11 +59,22 @@ class App extends Component<any, State> {
       loggedIn: token ? true : false,
       userData: {} as SpotifyApi.CurrentUsersProfileResponse,
       nowPlaying: { name: '', albumArt: '', artists: '' },
-      topArtists: [] as SpotifyApi.ArtistObjectFull[]
+      topArtists: [] as SpotifyApi.ArtistObjectFull[],
+      topTracks: [] as SpotifyApi.TrackObjectFull[],
+      artistRange: TimeRange.mediumTerm,
+      trackRange: TimeRange.mediumTerm,
+      topArtistsPage: 0,
+      topTracksPage: 0 
     }
   }
 
-  getHashParams() {
+  handler = (key: any, val: any) => {
+    let update: any = {};
+    update[key] = val;
+    this.setState(update);
+  }
+
+  getHashParams = () => {
     var hashParams: any = {};
     var e, r = /([^&;=]+)=?([^&;]*)/g,
         q = window.location.hash.substring(1);
@@ -62,19 +86,19 @@ class App extends Component<any, State> {
     return hashParams;
   }
 
-  getNowPlaying() {
+  getNowPlaying = () => {
     try {
       console.log('getting now playing')
       spotifyApi.getMyCurrentPlaybackState()
         .then((response) => {
-          if(response) {
+          if(response && response.item) {
             this.setState({
               nowPlaying: { 
-                  name: response!.item!.name, 
-                  artists: response!.item!.artists.reduce(function(acc, artist, i, artists) {
+                  name: response.item.name, 
+                  artists: response.item.artists.reduce(function(acc, artist, i, artists) {
                     return acc + (i < artists.length - 1 ? artist.name + ', ' : artist.name);
                   }, ''),
-                  albumArt: response!.item!.album.images[0].url
+                  albumArt: response.item.album.images[0].url
                 }
             });
           }
@@ -84,7 +108,7 @@ class App extends Component<any, State> {
     }
   }
 
-  getUserProfile() {
+  getUserProfile = () => {
     try {
       console.log('[ ] attempting to fetch user profile')
       spotifyApi.getMe()
@@ -96,14 +120,16 @@ class App extends Component<any, State> {
     } catch (e) {
       alert(e);
     } finally {
-      console.log('[x] user profile successfully fetched')
+      console.log('[x] user profile successfully fetched');
     }
   }
 
-  getUserTopArtists() {
+  getUserTopArtists = () => {
     console.log('[ ] attempting to fetch top listened artists')
     try {
-      spotifyApi.getMyTopArtists({limit: NUM_ARTISTS})
+      let page = this.state.topArtistsPage;
+      let range = this.state.artistRange;
+      spotifyApi.getMyTopArtists({ limit: NUM_ARTISTS, offset: page, time_range: range})
       .then((response) => {
         // store user's top artists
         this.setState({
@@ -120,11 +146,33 @@ class App extends Component<any, State> {
     }
   }
 
-  getArtistRelatedArtists(artistId: string) {
+  getUserTopTracks = () => {
+    console.log('[ ] attempting to fetch top listened tracks')
+    try {
+      let page = this.state.topTracksPage;
+      let range = this.state.trackRange;
+      spotifyApi.getMyTopTracks({ limit: NUM_ARTISTS, offset: page, time_range: range})
+      .then((response) => {
+        // store user's top artists
+        this.setState({
+          topTracks: response.items
+        });
+
+        console.log(response.items);
+      });
+    }
+    catch (e) {
+      alert(e)
+    } finally {
+      console.log('[x] recently listened tracks fetched');
+    }
+  }
+
+  getArtistRelatedArtists = (artistId: string) => {
     return spotifyApi.getArtistRelatedArtists(artistId);
   }
 
-  landingContent() {
+  landingContent = () => {
     return (
       <div className="notLoggedIn"> 
         <h1>Youtify</h1>
@@ -134,11 +182,14 @@ class App extends Component<any, State> {
     );
   }
 
-  loggedInContent() {
+  loggedInContent = () => {
     return (
       <div className="loggedIn"> 
           <div className="header">
-          <h1 className="title">Youtify</h1>
+          <div className="title">
+            <h1>Youtify</h1>
+            <Spin indicator={loadingIcon} spinning={false} />
+          </div>
             <div className="userProf">
               <h3 className="text">Hello, { this.state.userData.display_name }</h3>
               <img className="profPic" src={this.state.userData.images ? this.state.userData.images[0].url : ''} />
@@ -147,7 +198,7 @@ class App extends Component<any, State> {
               <h3 className="text">
                 <strong>Now Playing: </strong>
                 { this.state.nowPlaying.name !== '' ? 
-                  this.state.nowPlaying.name + '-' + this.state.nowPlaying.artists
+                  this.state.nowPlaying.name + ' - ' + this.state.nowPlaying.artists
                   : 'N/A'
                 }
               </h3>
@@ -165,7 +216,13 @@ class App extends Component<any, State> {
         <div style={{'width': '100%'}}>
           <Row gutter={[{xs: 8, sm: 16, md: 24, lg: 32 }, {xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={12} className="gutter-row">
-                <TopArtists topArtists={this.state.topArtists}/>
+                <MostListened 
+                  topArtists={this.state.topArtists}
+                  topTracks={this.state.topTracks}
+                  handler={this.handler}
+                  getUserTopArtists={this.getUserTopArtists}
+                  getUserTopTracks={this.getUserTopTracks}
+                />
               </Col>
               <Col span={12} className="gutter-row">
                 <div>
