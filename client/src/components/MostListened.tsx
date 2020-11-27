@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Slider, Tabs } from 'antd';
+import { Slider, Tabs, Card } from 'antd';
 import { TimeRange } from '../models/TimeRange';
 
 class MostListened extends Component<any, any> {
@@ -64,8 +64,8 @@ class MostListened extends Component<any, any> {
     }
 
     return (
-      <div className={'topArtistsContainer'}>
-        <div className={'topArtistsHeader'}>
+      <div className={'dashboardContainer'}>
+        <div className={'dashboardHeader'}>
           <h1>Most Listened</h1>
         </div>
         <Tabs centered
@@ -86,11 +86,14 @@ class MostListened extends Component<any, any> {
                     onSliderChange(e, 'artist');
                   }} />
               </div>
-              <div>
+              <div className={'artistTrackContainer'}>
               {
                   topArtists.map((artist: SpotifyApi.ArtistObjectFull) => {
                   return (
-                    <p key={artist.name}>{artist.name}</p>
+                    <div className={'artistCard'}>
+                      <img alt={artist.name} src={artist.images[0].url} />
+                      <p key={artist.name}>{artist.name}</p>
+                    </div>
                   )
                 })
               }

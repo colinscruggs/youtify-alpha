@@ -9,6 +9,7 @@ import './css/UI.css';
 import { State } from './models/State';
 import MostListened from './components/MostListened';
 import { TimeRange } from './models/TimeRange';
+import Genres from './components/Genres';
 
 // initialize global spotifyAPI ref
 const spotifyApi = new SpotifyWebApi();
@@ -129,7 +130,7 @@ class App extends Component<any, State> {
     try {
       let page = this.state.topArtistsPage;
       let range = this.state.artistRange;
-      spotifyApi.getMyTopArtists({ limit: NUM_ARTISTS, offset: page, time_range: range})
+      spotifyApi.getMyTopArtists({ limit: NUM_ARTISTS * 5, offset: page, time_range: range})
       .then((response) => {
         // store user's top artists
         this.setState({
@@ -208,12 +209,9 @@ class App extends Component<any, State> {
               }
             </div>
           </div>
-          <div>
-            
-          </div>
 
         {/* DASHBORD */}
-        <div style={{'width': '100%'}}>
+        <div style={{'width': '100%', 'overflowY' : 'scroll'}}>
           <Row gutter={[{xs: 8, sm: 16, md: 24, lg: 32 }, {xs: 8, sm: 16, md: 24, lg: 32 }]}>
               <Col span={12} className="gutter-row">
                 <MostListened 
@@ -226,7 +224,7 @@ class App extends Component<any, State> {
               </Col>
               <Col span={12} className="gutter-row">
                 <div>
-                  Genre Taste
+                  <Genres />
                 </div>
                 <div >
                   Listening Statistics
