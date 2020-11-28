@@ -18,6 +18,7 @@ const REFRESH_INTERVAL = 10;
 const loadingIcon = <LoadingOutlined style={{ fontSize: 24 }} />;
 
 class App extends Component<any, State> {
+  // auth token
   token = '';
 
   componentDidMount() {
@@ -65,7 +66,9 @@ class App extends Component<any, State> {
       artistRange: TimeRange.mediumTerm,
       trackRange: TimeRange.mediumTerm,
       topArtistsPage: 0,
-      topTracksPage: 0 
+      topTracksPage: 0,
+      genreList: [],
+      currentTopView: 'artists'
     }
   }
 
@@ -173,6 +176,10 @@ class App extends Component<any, State> {
     return spotifyApi.getArtistRelatedArtists(artistId);
   }
 
+  getGenresFromArtists = (artists: SpotifyApi.ArtistObjectFull[]) => {
+
+  }
+
   landingContent = () => {
     return (
       <div className="notLoggedIn"> 
@@ -224,7 +231,13 @@ class App extends Component<any, State> {
               </Col>
               <Col span={12} className="gutter-row">
                 <div>
-                  <Genres />
+                  <Genres 
+                    topArtists={this.state.topArtists}
+                    topTracks={this.state.topTracks}
+                    handler={this.handler}
+                    getUserTopArtists={this.getUserTopArtists}
+                    getUserTopTracks={this.getUserTopTracks}
+                  />
                 </div>
                 <div >
                   Listening Statistics

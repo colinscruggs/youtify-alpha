@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Slider, Tabs, Card } from 'antd';
+import { Slider, Tabs } from 'antd';
 import { TimeRange } from '../models/TimeRange';
 
 class MostListened extends Component<any, any> {
@@ -56,9 +56,11 @@ class MostListened extends Component<any, any> {
       switch(e) {
         case 'artists':
           getUserTopArtists();
+          handler('currentTopView', 'artists');
           break;
         case 'tracks':
           getUserTopTracks();
+          handler('currentTopView', 'tracks');
           break;
       }
     }
