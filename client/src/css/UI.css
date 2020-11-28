@@ -61,7 +61,6 @@
   padding: 1em;
   border-radius: 1em;
   background: #eee;
-  opacity: 0.9;
   display: flex;
   flex-direction: column;
   box-shadow:
@@ -71,6 +70,7 @@
   0 10.3px 17.9px rgba(0, 0, 0, 0.016),
   0 20px 15.2px rgba(0, 0, 0, 0.01),
   0 20px 80px rgba(0, 0, 0, 0.12);
+  min-height: fit-content;
 }
 
 .dashboardHeader h1 {

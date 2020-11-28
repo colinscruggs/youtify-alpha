@@ -47,7 +47,7 @@ class App extends Component<any, State> {
     setInterval(() => this.getNowPlaying(), REFRESH_INTERVAL * 1000)
   }
 
-  constructor(props: any){
+  constructor(props: any) {
     super(props);
     // fetch Spotify hash params/access token
     const params: any = this.getHashParams();
@@ -141,6 +141,8 @@ class App extends Component<any, State> {
         });
 
         console.log(response.items);
+
+        this.getGenresFromArtists(response.items);
       });
     }
     catch (e) {
@@ -177,7 +179,22 @@ class App extends Component<any, State> {
   }
 
   getGenresFromArtists = (artists: SpotifyApi.ArtistObjectFull[]) => {
-
+    const artistGenres = new Map;
+    artists.forEach(artist => {
+      artist.genres.forEach(genre => {
+        let genreFormatted = genre.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.substring(1)).join(' ');
+        if (artistGenres.get(genreFormatted) === undefined) {
+          artistGenres.set(genreFormatted, 1);
+        } else {
+          artistGenres.set(genreFormatted, artistGenres.get(genreFormatted) + 1);
+        }
+      })
+    });
+    console.log(artistGenres);
+    console.log(artistGenres.entries());
+    this.setState({...this.state, 
+      genreList: artistGenres
+    });
   }
 
   landingContent = () => {
@@ -237,10 +254,8 @@ class App extends Component<any, State> {
                     handler={this.handler}
                     getUserTopArtists={this.getUserTopArtists}
                     getUserTopTracks={this.getUserTopTracks}
+                    genreList={this.state.genreList}
                   />
-                </div>
-                <div >
-                  Listening Statistics
                 </div>
               </Col>
           </Row>

@@ -3,6 +3,9 @@ import Chart from 'chart.js';
 // import { Slider, Tabs } from 'antd';
 
 class Genres extends Component<any, any> {
+  constructor(props: any) {
+    super(props);
+  }
 
   render() {
     const {
@@ -10,19 +13,16 @@ class Genres extends Component<any, any> {
       topTracks,
       handler,
       getUserTopArtists,
-      getUserTopTracks
+      getUserTopTracks,
+      genreList
     } = this.props;
 
     const data = {
       datasets: [{
-          data: [10, 20, 30]
-      }],
+        data: Array.from(genreList.values())
+      }] as any[],
       // These labels appear in the legend and in the tooltips when hovering different arcs
-      labels: [
-          'Red',
-          'Yellow',
-          'Blue'
-      ]
+      labels: Array.from(genreList.keys()) as any[]
     };
 
     // context for chart <canvas />
@@ -30,16 +30,21 @@ class Genres extends Component<any, any> {
 
     let genrePieChart = ctx !== null ? new Chart(ctx, {
       type: 'pie',
-      data: data
-      //options: options
+      data: data,
+      options: {
+        responsive : true,
+        legend: {
+          display: false
+        }
+      }
     }) : null;
 
     return (
       <div className={'dashboardContainer'}>
         <div className={'dashboardHeader'}>
           <h1>Genre Analysis</h1>
-          <canvas id="genreChart" width="400" height="400"></canvas>
         </div>
+        <canvas id="genreChart"></canvas>
       </div>
     )
   }

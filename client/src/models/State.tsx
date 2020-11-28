@@ -10,6 +10,6 @@ export interface State {
   trackRange: TimeRange,
   topArtistsPage: number,
   topTracksPage: number,
-  genreList: [],
+  genreList: {},
   currentTopView: string
 }
