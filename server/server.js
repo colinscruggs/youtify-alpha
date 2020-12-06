@@ -7,10 +7,11 @@
  * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
  */
 
-var express = require('express'); // Express web server framework
-var request = require('request'); // "Request" library
-var querystring = require('querystring');
-var cookieParser = require('cookie-parser');
+const express = require('express'); // Express web server framework
+const path = require('path');
+const request = require('request'); // "Request" library
+const querystring = require('querystring');
+const cookieParser = require('cookie-parser');
 
 var client_id = '16b80bb6a6604b0392a49028ddce5b60'; // Your client id
 var client_secret = '484f90c3abf748c8bbb81802e5a38a21'; // Your secret
@@ -35,7 +36,7 @@ var stateKey = 'spotify_auth_state';
 
 var app = express();
 
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(path.join(__dirname + '/build')))
    .use(cookieParser());
 
 app.get('/login', function(req, res) {

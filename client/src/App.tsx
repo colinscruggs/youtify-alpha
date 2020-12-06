@@ -202,7 +202,7 @@ class App extends Component<any, State> {
       <div className="notLoggedIn"> 
         <h1>Youtify</h1>
         <p>This app requires authorization from your Spotify account. Log in below:</p>
-        <a href='http://localhost:8888' > Login to Spotify </a> 
+        <a href='http://localhost:8888/login' > Login to Spotify </a> 
       </div> 
     );
   }
