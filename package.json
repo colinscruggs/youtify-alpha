@@ -4,7 +4,7 @@
   "scripts": {
     "start": "concurrently \"npm run build-client\" \"npm run start-server\"",
     "start-local": "concurrently \"npm run start-server-local\" \"npm run build-client-local\"",
-    "build-client": "cd client && npm run start && cd ..",
+    "build-client": "cd client && npm run build && cd ..",
     "build-client-local": "cd client && npm run start && cd ..",
     "start-server": "cd server && node server && cd ..",
     "start-server-local": "cd server && node server && cd .."
