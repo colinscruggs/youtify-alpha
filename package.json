@@ -2,7 +2,7 @@
   "name": "youtify",
   "version": "1.0.0",
   "scripts": {
-    "start": "concurrently \"npm run build-client\" \"npm run start-server\"",
+    "start": "npm ci && concurrently \"npm run build-client\" \"npm run start-server\"",
     "start-local": "concurrently \"npm run start-server-local\" \"npm run build-client-local\"",
     "build-client": "cd client && npm ci && npm run build && cd ..",
     "build-client-local": "cd client && npm run start && cd ..",
