@@ -2,7 +2,7 @@
   "functions": {
   },
   "hosting": {
-    "public": "public",
+    "public": "client/build",
     "ignore": [
       "firebase.json",
       "**/.*",

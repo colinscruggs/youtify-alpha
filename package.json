@@ -4,10 +4,10 @@
   "scripts": {
     "start": "concurrently \"npm run build-client\" \"npm run start-server\"",
     "start-local": "concurrently \"npm run start-server-local\" \"npm run build-client-local\"",
-    "build-client": "cd public && cd client && npm ci && npm run build && cd ..",
-    "build-client-local": "cd public && client && npm run start && cd ..",
-    "start-server": "cd public && cd server && npm ci && node server && cd ..",
-    "start-server-local": "cd public && server && node server && cd .."
+    "build-client": "cd client && npm ci && npm run build && cd ..",
+    "build-client-local": "cd client && npm run start && cd ..",
+    "start-server": "cd functions && npm ci && cd .. && node functions",
+    "start-server-local": "node functions"
   },
   "dependencies": {
     "concurrently": "^5.3.0",
